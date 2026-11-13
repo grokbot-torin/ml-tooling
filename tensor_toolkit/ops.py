@@ -96,3 +96,18 @@ def cosine_similarity(
     num = np.sum(a * b, axis=axis)
     denom = np.linalg.norm(a, axis=axis) * np.linalg.norm(b, axis=axis)
     return num / np.maximum(denom, eps)
+
+
+def softmax(x: np.ndarray, axis: int = -1) -> np.ndarray:
+    """Numerically stable softmax along ``axis``."""
+    x = np.asarray(x, dtype=float)
+    z = x - np.max(x, axis=axis, keepdims=True)
+    exp_z = np.exp(z)
+    return exp_z / np.sum(exp_z, axis=axis, keepdims=True)
+
+
+def log_softmax(x: np.ndarray, axis: int = -1) -> np.ndarray:
+    """Numerically stable log-softmax along ``axis``."""
+    x = np.asarray(x, dtype=float)
+    z = x - np.max(x, axis=axis, keepdims=True)
+    return z - np.log(np.sum(np.exp(z), axis=axis, keepdims=True))

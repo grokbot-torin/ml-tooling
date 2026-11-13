@@ -72,3 +72,17 @@ def test_cosine_similarity_identical_and_orthogonal():
     out = cosine_similarity(a, b, axis=1)
     np.testing.assert_allclose(out[0], 1.0)
     np.testing.assert_allclose(out[1], 0.0, atol=1e-12)
+
+
+
+def test_softmax_sums_to_one_and_matches_log():
+    from tensor_toolkit.ops import log_softmax, softmax
+
+    x = np.array([[1.0, 2.0, 3.0], [0.0, 0.0, 0.0]])
+    probs = softmax(x, axis=1)
+    np.testing.assert_allclose(probs.sum(axis=1), 1.0)
+    np.testing.assert_allclose(np.exp(log_softmax(x, axis=1)), probs)
+    # large offsets should not overflow
+    huge = softmax(np.array([1000.0, 1001.0, 1002.0]))
+    assert np.isfinite(huge).all()
+    np.testing.assert_allclose(huge.sum(), 1.0)
