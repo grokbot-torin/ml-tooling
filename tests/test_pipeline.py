@@ -49,3 +49,23 @@ def test_pipeline_chains_standardizer_and_minmax():
 def test_pipeline_rejects_empty_steps():
     with pytest.raises(ValueError):
         Pipeline([])
+
+
+
+from tensor_toolkit.pipeline import winsorize
+
+
+def test_winsorize_clips_tails():
+    x = np.array([0.0, 1.0, 2.0, 3.0, 100.0])
+    out = winsorize(x, limits=(0.2, 0.2), axis=0)
+    lo = np.quantile(x, 0.2)
+    hi = np.quantile(x, 0.8)
+    np.testing.assert_allclose(out.min(), lo)
+    np.testing.assert_allclose(out.max(), hi)
+    assert out[-1] == out.max()
+    # interior points that already sit inside the quantiles are unchanged
+    np.testing.assert_array_equal(out[1:4], x[1:4])
+
+def test_winsorize_rejects_bad_limits():
+    with pytest.raises(ValueError):
+        winsorize(np.arange(5.0), limits=(0.6, 0.6))
