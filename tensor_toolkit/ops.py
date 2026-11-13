@@ -159,3 +159,26 @@ def topk(
     idx = np.take_along_axis(idx, order, axis=axis)
     vals = np.take_along_axis(vals, order, axis=axis)
     return vals, idx
+
+
+def pad_to_multiple(
+    x: np.ndarray,
+    multiple: int,
+    axis: int = 0,
+    value: float = 0,
+) -> np.ndarray:
+    """Pad ``axis`` so its length is a multiple of ``multiple``.
+
+    Arrays that already line up are returned unchanged (a view is
+    fine; no copy is forced).
+    """
+    x = np.asarray(x)
+    if multiple < 1:
+        raise ValueError("multiple must be >= 1")
+    length = x.shape[axis]
+    remainder = length % multiple
+    if remainder == 0:
+        return x
+    pad_width = [(0, 0)] * x.ndim
+    pad_width[axis] = (0, multiple - remainder)
+    return np.pad(x, pad_width, constant_values=value)

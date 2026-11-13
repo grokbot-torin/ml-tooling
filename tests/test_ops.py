@@ -111,3 +111,15 @@ def test_topk_largest_and_smallest():
     vals, idx = topk(x[0], k=2, largest=False)
     np.testing.assert_array_equal(vals, [1.0, 2.0])
     np.testing.assert_array_equal(idx, [1, 3])
+
+
+
+def test_pad_to_multiple_extends_axis():
+    from tensor_toolkit.ops import pad_to_multiple
+
+    x = np.arange(5)
+    out = pad_to_multiple(x, multiple=4, value=-1)
+    np.testing.assert_array_equal(out, [0, 1, 2, 3, 4, -1, -1, -1])
+    y = np.arange(8).reshape(2, 4)
+    same = pad_to_multiple(y, multiple=2, axis=0)
+    np.testing.assert_array_equal(same, y)
