@@ -64,3 +64,31 @@ def ngrams(tokens: Iterable[str], n: int) -> list[tuple[str, ...]]:
         raise ValueError("n must be >= 1")
     tokens = list(tokens)
     return [tuple(tokens[i : i + n]) for i in range(len(tokens) - n + 1)]
+
+
+
+def pad_sequences(
+    sequences,
+    length: int | None = None,
+    pad_id: int = 0,
+    truncating: str = "post",
+    padding: str = "post",
+):
+    """Pad or truncate a batch of id sequences to a rectangular array."""
+    import numpy as np
+
+    seqs = [list(seq) for seq in sequences]
+    if length is None:
+        length = max((len(seq) for seq in seqs), default=0)
+    if length < 0:
+        raise ValueError("length must be non-negative")
+    if truncating not in {"pre", "post"} or padding not in {"pre", "post"}:
+        raise ValueError("truncating and padding must be 'pre' or 'post'")
+    out = np.full((len(seqs), length), pad_id, dtype=int)
+    for i, seq in enumerate(seqs):
+        trimmed = seq[:length] if truncating == "post" else seq[-length:]
+        if padding == "post":
+            out[i, : len(trimmed)] = trimmed
+        else:
+            out[i, length - len(trimmed) :] = trimmed
+    return out
