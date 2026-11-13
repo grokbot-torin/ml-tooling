@@ -24,3 +24,38 @@ def one_hot(labels: np.ndarray, num_classes: int | None = None) -> np.ndarray:
     out[np.arange(labels.shape[0]), labels.astype(int)] = 1.0
     return out
 
+
+
+
+class LabelEncoder:
+    """Map hashable labels to contiguous integer ids."""
+
+    def __init__(self) -> None:
+        self.classes_: np.ndarray | None = None
+        self._map: dict | None = None
+
+    def fit(self, y) -> "LabelEncoder":
+        y = np.asarray(y)
+        self.classes_ = np.unique(y)
+        self._map = {value: idx for idx, value in enumerate(self.classes_)}
+        return self
+
+    def transform(self, y) -> np.ndarray:
+        if self._map is None:
+            raise RuntimeError("LabelEncoder must be fit before transform")
+        y = np.asarray(y)
+        try:
+            return np.array([self._map[value] for value in y], dtype=int)
+        except KeyError as exc:
+            raise ValueError(f"unseen label: {exc}") from exc
+
+    def inverse_transform(self, ids) -> np.ndarray:
+        if self.classes_ is None:
+            raise RuntimeError("LabelEncoder must be fit before inverse_transform")
+        ids = np.asarray(ids, dtype=int)
+        if np.any(ids < 0) or np.any(ids >= len(self.classes_)):
+            raise ValueError("ids are out of range")
+        return self.classes_[ids]
+
+    def fit_transform(self, y) -> np.ndarray:
+        return self.fit(y).transform(y)
