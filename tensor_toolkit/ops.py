@@ -60,3 +60,23 @@ def soft_clip(x: np.ndarray, low: float, high: float, sharpness: float = 4.0) ->
     mid = 0.5 * (low + high)
     half = 0.5 * (high - low)
     return mid + half * np.tanh(sharpness * (x - mid) / half)
+
+
+def safe_divide(
+    numerator: np.ndarray,
+    denominator: np.ndarray,
+    eps: float = 1e-12,
+) -> np.ndarray:
+    """Element-wise division that never divides by a near-zero value.
+
+    Denominators with absolute value below ``eps`` are replaced by
+    ``eps`` with the original sign preserved (positive if the value
+    was exactly zero).
+    """
+    if eps <= 0:
+        raise ValueError("eps must be positive")
+    num = np.asarray(numerator, dtype=float)
+    den = np.asarray(denominator, dtype=float)
+    replacement = np.where(den >= 0, eps, -eps)
+    safe = np.where(np.abs(den) < eps, replacement, den)
+    return num / safe
