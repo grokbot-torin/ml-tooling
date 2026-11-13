@@ -98,3 +98,16 @@ def test_masked_mean_ignores_padded_positions():
     np.testing.assert_allclose(out, [2.0, 3.0])
     empty = masked_mean(np.array([1.0, 2.0]), np.array([0.0, 0.0]))
     np.testing.assert_allclose(empty, 0.0)
+
+
+
+def test_topk_largest_and_smallest():
+    from tensor_toolkit.ops import topk
+
+    x = np.array([[3.0, 1.0, 4.0, 2.0], [8.0, 5.0, 7.0, 6.0]])
+    vals, idx = topk(x, k=2, axis=1, largest=True)
+    np.testing.assert_array_equal(vals, [[4.0, 3.0], [8.0, 7.0]])
+    np.testing.assert_array_equal(idx, [[2, 0], [0, 2]])
+    vals, idx = topk(x[0], k=2, largest=False)
+    np.testing.assert_array_equal(vals, [1.0, 2.0])
+    np.testing.assert_array_equal(idx, [1, 3])
