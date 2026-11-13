@@ -34,3 +34,19 @@ def test_random_scale_global_and_per_axis():
     row_vals = per[:, 0]
     np.testing.assert_allclose(per, np.repeat(row_vals[:, None], 3, axis=1))
     assert np.all(row_vals >= 0.5) and np.all(row_vals <= 1.5)
+
+
+
+from tensor_toolkit.augment import mixup
+
+
+def test_mixup_is_convex_combination():
+    x = np.array([[1.0, 0.0], [0.0, 1.0], [1.0, 1.0]])
+    y = np.eye(3)
+    x_mix, y_mix, lam = mixup(x, y, alpha=0.4, rng=2)
+    assert 0.0 <= lam <= 1.0
+    assert x_mix.shape == x.shape
+    assert y_mix.shape == y.shape
+    np.testing.assert_allclose(y_mix.sum(axis=1), 1.0)
+    with pytest.raises(ValueError):
+        mixup(x, y[:2], alpha=0.4, rng=0)
