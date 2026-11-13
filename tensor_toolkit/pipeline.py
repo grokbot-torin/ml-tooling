@@ -76,3 +76,52 @@ class MinMaxScaler:
         low, high = self.feature_range
         span = np.maximum(self.data_max_ - self.data_min_, self.eps)
         return (x - low) / (high - low) * span + self.data_min_
+
+
+
+class Pipeline:
+    """Apply a sequence of fit/transform steps to an array."""
+
+    def __init__(self, steps: list) -> None:
+        if not steps:
+            raise ValueError("Pipeline needs at least one step")
+        self.steps = list(steps)
+
+    def fit(self, x: np.ndarray) -> "Pipeline":
+        x = np.asarray(x)
+        for step in self.steps[:-1]:
+            x = _fit_transform_step(step, x)
+        last = self.steps[-1]
+        if hasattr(last, "fit"):
+            last.fit(x)
+        return self
+
+    def transform(self, x: np.ndarray) -> np.ndarray:
+        x = np.asarray(x)
+        for step in self.steps:
+            x = _transform_step(step, x)
+        return x
+
+    def fit_transform(self, x: np.ndarray) -> np.ndarray:
+        x = np.asarray(x)
+        for step in self.steps:
+            x = _fit_transform_step(step, x)
+        return x
+
+
+def _fit_transform_step(step, x):
+    if hasattr(step, "fit_transform"):
+        return step.fit_transform(x)
+    if hasattr(step, "fit") and hasattr(step, "transform"):
+        return step.fit(x).transform(x)
+    if callable(step):
+        return step(x)
+    raise TypeError(f"unsupported pipeline step: {step!r}")
+
+
+def _transform_step(step, x):
+    if hasattr(step, "transform"):
+        return step.transform(x)
+    if callable(step):
+        return step(x)
+    raise TypeError(f"unsupported pipeline step: {step!r}")

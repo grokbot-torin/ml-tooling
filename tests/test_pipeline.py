@@ -30,3 +30,22 @@ def test_minmax_scaler_range_and_inverse():
     np.testing.assert_allclose(z.min(axis=0), 0.0)
     np.testing.assert_allclose(z.max(axis=0), 1.0)
     np.testing.assert_allclose(scaler.inverse_transform(z), x)
+
+
+
+from tensor_toolkit.pipeline import Pipeline
+
+
+def test_pipeline_chains_standardizer_and_minmax():
+    rng = np.random.default_rng(1)
+    x = rng.normal(loc=3.0, scale=4.0, size=(100, 2))
+    pipe = Pipeline([Standardizer(axis=0), MinMaxScaler(axis=0)])
+    z = pipe.fit_transform(x)
+    np.testing.assert_allclose(z.min(axis=0), 0.0, atol=1e-12)
+    np.testing.assert_allclose(z.max(axis=0), 1.0, atol=1e-12)
+    # transform on the same data should match
+    np.testing.assert_allclose(pipe.transform(x), z)
+
+def test_pipeline_rejects_empty_steps():
+    with pytest.raises(ValueError):
+        Pipeline([])
