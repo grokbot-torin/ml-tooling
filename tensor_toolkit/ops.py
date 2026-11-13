@@ -131,3 +131,31 @@ def masked_mean(
     except ValueError as exc:
         raise ValueError("mask must be broadcastable to x") from exc
     return np.sum(x * weights, axis=axis) / np.maximum(np.sum(weights, axis=axis), eps)
+
+
+def topk(
+    x: np.ndarray,
+    k: int,
+    axis: int = -1,
+    largest: bool = True,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Return the top-``k`` values and their indices along ``axis``."""
+    x = np.asarray(x)
+    if k < 1:
+        raise ValueError("k must be >= 1")
+    n = x.shape[axis]
+    if k > n:
+        raise ValueError(f"k={k} is larger than axis length {n}")
+    if largest:
+        idx = np.argpartition(x, -k, axis=axis)
+        idx = np.take(idx, np.arange(n - k, n), axis=axis)
+    else:
+        idx = np.argpartition(x, k - 1, axis=axis)
+        idx = np.take(idx, np.arange(0, k), axis=axis)
+    vals = np.take_along_axis(x, idx, axis=axis)
+    order = np.argsort(vals, axis=axis)
+    if largest:
+        order = np.flip(order, axis=axis)
+    idx = np.take_along_axis(idx, order, axis=axis)
+    vals = np.take_along_axis(vals, order, axis=axis)
+    return vals, idx
