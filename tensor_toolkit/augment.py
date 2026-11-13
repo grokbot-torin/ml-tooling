@@ -37,3 +37,29 @@ def random_scale(
     shape = [1] * x.ndim
     shape[axis] = x.shape[axis]
     return x * rng.uniform(low, high, size=tuple(shape))
+
+
+
+def mixup(
+    x: np.ndarray,
+    y: np.ndarray,
+    alpha: float = 0.4,
+    rng=None,
+) -> tuple[np.ndarray, np.ndarray, float]:
+    """Return a vicinal pairing of ``x`` and ``y`` using Mixup.
+
+    A single mixing coefficient is drawn from a Beta(alpha, alpha)
+    distribution and applied to a random permutation of the batch.
+    """
+    x = np.asarray(x, dtype=float)
+    y = np.asarray(y, dtype=float)
+    if len(x) != len(y):
+        raise ValueError("x and y must share the same first-axis length")
+    if alpha <= 0:
+        raise ValueError("alpha must be positive")
+    rng = np.random.default_rng(rng)
+    lam = float(rng.beta(alpha, alpha))
+    idx = rng.permutation(len(x))
+    x_mix = lam * x + (1.0 - lam) * x[idx]
+    y_mix = lam * y + (1.0 - lam) * y[idx]
+    return x_mix, y_mix, lam
