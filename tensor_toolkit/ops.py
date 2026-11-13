@@ -80,3 +80,19 @@ def safe_divide(
     replacement = np.where(den >= 0, eps, -eps)
     safe = np.where(np.abs(den) < eps, replacement, den)
     return num / safe
+
+
+def cosine_similarity(
+    a: np.ndarray,
+    b: np.ndarray,
+    axis: int = -1,
+    eps: float = 1e-12,
+) -> np.ndarray:
+    """Cosine similarity between ``a`` and ``b`` along ``axis``."""
+    a = np.asarray(a, dtype=float)
+    b = np.asarray(b, dtype=float)
+    if a.shape != b.shape:
+        raise ValueError("a and b must have the same shape")
+    num = np.sum(a * b, axis=axis)
+    denom = np.linalg.norm(a, axis=axis) * np.linalg.norm(b, axis=axis)
+    return num / np.maximum(denom, eps)
