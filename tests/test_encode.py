@@ -18,3 +18,16 @@ def test_one_hot_infers_classes_and_rejects_bad_labels():
     with pytest.raises(ValueError):
         one_hot(np.array([[0, 1]]))
 
+
+
+
+from tensor_toolkit.encode import LabelEncoder
+
+
+def test_label_encoder_roundtrip():
+    enc = LabelEncoder()
+    ids = enc.fit_transform(["cat", "dog", "cat", "bird"])
+    np.testing.assert_array_equal(ids, [1, 2, 1, 0])
+    np.testing.assert_array_equal(enc.inverse_transform(ids), ["cat", "dog", "cat", "bird"])
+    with pytest.raises(ValueError):
+        enc.transform(["lizard"])
