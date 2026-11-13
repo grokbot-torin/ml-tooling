@@ -111,3 +111,23 @@ def log_softmax(x: np.ndarray, axis: int = -1) -> np.ndarray:
     x = np.asarray(x, dtype=float)
     z = x - np.max(x, axis=axis, keepdims=True)
     return z - np.log(np.sum(np.exp(z), axis=axis, keepdims=True))
+
+
+def masked_mean(
+    x: np.ndarray,
+    mask: np.ndarray,
+    axis=None,
+    eps: float = 1e-12,
+) -> np.ndarray:
+    """Mean of ``x`` over positions where ``mask`` is truthy.
+
+    ``mask`` must be broadcastable to ``x``. Empty slices (all
+    masked out) return 0 rather than NaN.
+    """
+    x = np.asarray(x, dtype=float)
+    weights = np.asarray(mask, dtype=float)
+    try:
+        weights = np.broadcast_to(weights, x.shape)
+    except ValueError as exc:
+        raise ValueError("mask must be broadcastable to x") from exc
+    return np.sum(x * weights, axis=axis) / np.maximum(np.sum(weights, axis=axis), eps)
