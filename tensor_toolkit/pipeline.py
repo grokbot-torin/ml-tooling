@@ -35,3 +35,44 @@ class Standardizer:
         x = np.asarray(x, dtype=float)
         return x * np.maximum(self.std_, self.eps) + self.mean_
 
+
+
+
+class MinMaxScaler:
+    """Scale features to a target range, defaulting to ``[0, 1]``."""
+
+    def __init__(self, feature_range: tuple[float, float] = (0.0, 1.0), axis: int = 0, eps: float = 1e-12) -> None:
+        low, high = feature_range
+        if high <= low:
+            raise ValueError("feature_range must satisfy high > low")
+        self.feature_range = (float(low), float(high))
+        self.axis = axis
+        self.eps = eps
+        self.data_min_: np.ndarray | None = None
+        self.data_max_: np.ndarray | None = None
+
+    def fit(self, x: np.ndarray) -> "MinMaxScaler":
+        x = np.asarray(x, dtype=float)
+        self.data_min_ = np.min(x, axis=self.axis, keepdims=True)
+        self.data_max_ = np.max(x, axis=self.axis, keepdims=True)
+        return self
+
+    def transform(self, x: np.ndarray) -> np.ndarray:
+        if self.data_min_ is None or self.data_max_ is None:
+            raise RuntimeError("MinMaxScaler must be fit before transform")
+        x = np.asarray(x, dtype=float)
+        low, high = self.feature_range
+        span = np.maximum(self.data_max_ - self.data_min_, self.eps)
+        scaled = (x - self.data_min_) / span
+        return scaled * (high - low) + low
+
+    def fit_transform(self, x: np.ndarray) -> np.ndarray:
+        return self.fit(x).transform(x)
+
+    def inverse_transform(self, x: np.ndarray) -> np.ndarray:
+        if self.data_min_ is None or self.data_max_ is None:
+            raise RuntimeError("MinMaxScaler must be fit before inverse_transform")
+        x = np.asarray(x, dtype=float)
+        low, high = self.feature_range
+        span = np.maximum(self.data_max_ - self.data_min_, self.eps)
+        return (x - low) / (high - low) * span + self.data_min_
