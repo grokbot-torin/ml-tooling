@@ -26,3 +26,16 @@ def test_vocabulary_fit_and_unknowns():
     assert ids[1] == vocab.token_to_id["<unk>"]
     assert vocab.ids_to_tokens(ids)[0] == "cat"
     assert len(vocab) == 4  # pad, unk, cat, dog
+
+
+
+from tensor_toolkit.tokenize import ngrams
+
+
+def test_ngrams_unigrams_and_bigrams():
+    tokens = ["the", "cat", "sat"]
+    assert ngrams(tokens, 1) == [("the",), ("cat",), ("sat",)]
+    assert ngrams(tokens, 2) == [("the", "cat"), ("cat", "sat")]
+    assert ngrams(tokens, 4) == []
+    with pytest.raises(ValueError):
+        ngrams(tokens, 0)
