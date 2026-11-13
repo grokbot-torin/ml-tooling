@@ -61,3 +61,14 @@ def test_safe_divide_regular_and_near_zero():
     assert np.isfinite(out).all()
     np.testing.assert_allclose(out[0], 1.0 / 1e-12)
     np.testing.assert_allclose(out[1], -1.0 / -1e-12)
+
+
+
+def test_cosine_similarity_identical_and_orthogonal():
+    from tensor_toolkit.ops import cosine_similarity
+
+    a = np.array([[1.0, 0.0], [1.0, 1.0]])
+    b = np.array([[2.0, 0.0], [1.0, -1.0]])
+    out = cosine_similarity(a, b, axis=1)
+    np.testing.assert_allclose(out[0], 1.0)
+    np.testing.assert_allclose(out[1], 0.0, atol=1e-12)
