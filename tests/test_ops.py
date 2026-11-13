@@ -86,3 +86,15 @@ def test_softmax_sums_to_one_and_matches_log():
     huge = softmax(np.array([1000.0, 1001.0, 1002.0]))
     assert np.isfinite(huge).all()
     np.testing.assert_allclose(huge.sum(), 1.0)
+
+
+
+def test_masked_mean_ignores_padded_positions():
+    from tensor_toolkit.ops import masked_mean
+
+    x = np.array([[1.0, 3.0, 99.0], [2.0, 4.0, 100.0]])
+    mask = np.array([[1.0, 1.0, 0.0], [1.0, 1.0, 0.0]])
+    out = masked_mean(x, mask, axis=1)
+    np.testing.assert_allclose(out, [2.0, 3.0])
+    empty = masked_mean(np.array([1.0, 2.0]), np.array([0.0, 0.0]))
+    np.testing.assert_allclose(empty, 0.0)
