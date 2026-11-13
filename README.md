@@ -21,6 +21,15 @@ normalized = batch_l2_normalize(x)
 windows = sliding_window(normalized, window=8, stride=4)
 ```
 
+## Tests
+
+```bash
+pip install -e ".[dev]"
+pytest
+```
+
+CI runs the same suite on Python 3.10 and 3.12 for every push and pull request to `main`.
+
 ## Layout
 
 - `tensor_toolkit.ops` — array / tensor helpers
