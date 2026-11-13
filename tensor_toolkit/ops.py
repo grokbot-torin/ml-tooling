@@ -44,3 +44,19 @@ def sliding_window(x: np.ndarray, window: int, stride: int = 1, axis: int = 0) -
     stacked = np.stack(windows, axis=axis)
     # Move the window length next to the window index.
     return np.moveaxis(stacked, axis + 1, axis + 1)
+
+
+def soft_clip(x: np.ndarray, low: float, high: float, sharpness: float = 4.0) -> np.ndarray:
+    """Smoothly squash values into ``(low, high)`` with a tanh curve.
+
+    The midpoint of the range is a fixed point. Larger ``sharpness``
+    values make the function approach the bounds more quickly.
+    """
+    if high <= low:
+        raise ValueError("high must be greater than low")
+    if sharpness <= 0:
+        raise ValueError("sharpness must be positive")
+    x = np.asarray(x, dtype=float)
+    mid = 0.5 * (low + high)
+    half = 0.5 * (high - low)
+    return mid + half * np.tanh(sharpness * (x - mid) / half)
