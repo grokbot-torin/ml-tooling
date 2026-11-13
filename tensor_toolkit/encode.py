@@ -59,3 +59,41 @@ class LabelEncoder:
 
     def fit_transform(self, y) -> np.ndarray:
         return self.fit(y).transform(y)
+
+
+
+def bin_features(
+    x: np.ndarray,
+    n_bins: int = 5,
+    strategy: str = "uniform",
+) -> np.ndarray:
+    """Discretize numeric features into integer bin ids.
+
+    ``strategy='uniform'`` uses evenly spaced edges between the min
+    and max. ``strategy='quantile'`` uses empirical quantiles so
+    each bin holds a similar share of the mass. Accepts 1-d or 2-d
+    arrays (columns are binned independently).
+    """
+    x = np.asarray(x, dtype=float)
+    if n_bins < 2:
+        raise ValueError("n_bins must be >= 2")
+    if x.ndim == 1:
+        return _bin_1d(x, n_bins, strategy)
+    if x.ndim != 2:
+        raise ValueError("x must be 1d or 2d")
+    columns = [_bin_1d(x[:, i], n_bins, strategy) for i in range(x.shape[1])]
+    return np.stack(columns, axis=1)
+
+
+def _bin_1d(x: np.ndarray, n_bins: int, strategy: str) -> np.ndarray:
+    if strategy == "uniform":
+        edges = np.linspace(np.min(x), np.max(x), n_bins + 1)
+    elif strategy == "quantile":
+        edges = np.quantile(x, np.linspace(0.0, 1.0, n_bins + 1))
+    else:
+        raise ValueError("strategy must be 'uniform' or 'quantile'")
+    if edges[0] == edges[-1]:
+        return np.zeros(len(x), dtype=int)
+    edges = np.unique(edges)
+    # digitize interior edges: values fall into 0..len(edges)-2
+    return np.digitize(x, edges[1:-1], right=False)
