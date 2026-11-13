@@ -39,3 +39,18 @@ def test_ngrams_unigrams_and_bigrams():
     assert ngrams(tokens, 4) == []
     with pytest.raises(ValueError):
         ngrams(tokens, 0)
+
+
+
+from tensor_toolkit.tokenize import pad_sequences
+import numpy as np
+
+
+def test_pad_sequences_padding_and_truncation():
+    seqs = [[1, 2, 3, 4], [5], [6, 7]]
+    post = pad_sequences(seqs, length=3, pad_id=0, padding="post", truncating="post")
+    np.testing.assert_array_equal(post, [[1, 2, 3], [5, 0, 0], [6, 7, 0]])
+    pre = pad_sequences(seqs, length=3, pad_id=9, padding="pre", truncating="pre")
+    np.testing.assert_array_equal(pre, [[2, 3, 4], [9, 9, 5], [9, 6, 7]])
+    inferred = pad_sequences([[1, 2], [3]])
+    assert inferred.shape == (2, 2)
