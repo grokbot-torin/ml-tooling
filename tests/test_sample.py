@@ -19,3 +19,15 @@ def test_train_test_split_rejects_mismatched_lengths():
     with pytest.raises(ValueError):
         train_test_split(np.arange(5), np.arange(4))
 
+
+
+
+from tensor_toolkit.sample import weighted_choice
+
+
+def test_weighted_choice_respects_zero_weights():
+    pop = np.array(["a", "b", "c"])
+    out = weighted_choice(pop, weights=[0.0, 1.0, 0.0], size=8, replace=True, rng=3)
+    assert set(out.tolist()) == {"b"}
+    with pytest.raises(ValueError):
+        weighted_choice(pop, weights=[-1.0, 1.0, 0.0])
