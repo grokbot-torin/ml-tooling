@@ -50,3 +50,14 @@ def test_soft_clip_rejects_bad_range():
 
     with pytest.raises(ValueError):
         soft_clip(np.array([0.0]), 1.0, 0.0)
+
+
+
+def test_safe_divide_regular_and_near_zero():
+    from tensor_toolkit.ops import safe_divide
+
+    np.testing.assert_allclose(safe_divide([6.0, 4.0], [3.0, 2.0]), [2.0, 2.0])
+    out = safe_divide([1.0, -1.0], [0.0, -1e-20], eps=1e-12)
+    assert np.isfinite(out).all()
+    np.testing.assert_allclose(out[0], 1.0 / 1e-12)
+    np.testing.assert_allclose(out[1], -1.0 / -1e-12)
