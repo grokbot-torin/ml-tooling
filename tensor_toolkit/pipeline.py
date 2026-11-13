@@ -125,3 +125,22 @@ def _transform_step(step, x):
     if callable(step):
         return step(x)
     raise TypeError(f"unsupported pipeline step: {step!r}")
+
+
+
+def winsorize(
+    x: np.ndarray,
+    limits: tuple[float, float] = (0.05, 0.05),
+    axis: int = 0,
+) -> np.ndarray:
+    """Clip values to interior quantiles along ``axis``.
+
+    ``limits`` is a pair of lower and upper tail probabilities.
+    """
+    low_q, high_q = limits
+    if not (0 <= low_q < 1 and 0 <= high_q < 1) or low_q + high_q >= 1:
+        raise ValueError("limits must leave a non-empty interior quantile range")
+    x = np.asarray(x, dtype=float)
+    lo = np.quantile(x, low_q, axis=axis, keepdims=True)
+    hi = np.quantile(x, 1.0 - high_q, axis=axis, keepdims=True)
+    return np.clip(x, lo, hi)
