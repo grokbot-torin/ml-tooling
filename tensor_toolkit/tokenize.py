@@ -55,3 +55,12 @@ class Vocabulary:
         if self.id_to_token is None:
             return 0
         return len(self.id_to_token)
+
+
+
+def ngrams(tokens: Iterable[str], n: int) -> list[tuple[str, ...]]:
+    """Return ordered n-grams from a token sequence."""
+    if n < 1:
+        raise ValueError("n must be >= 1")
+    tokens = list(tokens)
+    return [tuple(tokens[i : i + n]) for i in range(len(tokens) - n + 1)]
